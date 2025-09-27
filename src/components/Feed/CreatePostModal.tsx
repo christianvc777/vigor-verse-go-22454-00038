@@ -58,16 +58,18 @@ const CreatePostModal = ({ isOpen, onClose, onCreatePost }: CreatePostModalProps
     setIsLoading(true);
     
     // Create new post
+    const newPost = {
+      user: { id: 'me', name: user.name, avatar: user.avatar },
+      content,
+      images,
+      timestamp: 'Ahora',
+      location: location || 'Mi ubicación',
+      tags: content.match(/#\w+/g)?.map(tag => tag.substring(1)) || [],
+      postType: 'regular' as const
+    };
+
     if (onCreatePost) {
-      onCreatePost({
-        user: { id: 'me', name: user.name, avatar: user.avatar },
-        content,
-        images,
-        timestamp: 'Ahora',
-        location: location || 'Mi ubicación',
-        tags: content.match(/#\w+/g)?.map(tag => tag.substring(1)) || [],
-        postType: 'regular'
-      });
+      onCreatePost(newPost);
     }
     
     setTimeout(() => {
@@ -85,7 +87,7 @@ const CreatePostModal = ({ isOpen, onClose, onCreatePost }: CreatePostModalProps
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="modal-content max-w-lg">
+      <DialogContent className="modal-content max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-center">Crear Publicación</DialogTitle>
         </DialogHeader>

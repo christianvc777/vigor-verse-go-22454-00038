@@ -306,7 +306,44 @@ const Feed = () => {
               <div className="p-4">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-4">
-                    // ... keep existing like and message buttons
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleLike(post.id);
+                      }}
+                      className="p-0 h-auto"
+                    >
+                      <Heart
+                        className={`w-6 h-6 ${post.isLiked ? 'fill-red-500 text-red-500' : 'text-foreground'}`}
+                      />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openChat(post.user.id, post.user.name);
+                      }}
+                      className="p-0 h-auto"
+                    >
+                      <MessageCircle className="w-6 h-6 text-foreground" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toast({
+                          title: "Compartido",
+                          description: "Post compartido exitosamente",
+                        });
+                      }}
+                      className="p-0 h-auto"
+                    >
+                      <Share className="w-6 h-6 text-foreground" />
+                    </Button>
                   </div>
                 </div>
 
