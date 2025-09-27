@@ -3,10 +3,9 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Heart, MessageCircle, Share, Plus } from 'lucide-react';
+import { Heart, MessageCircle, Share, Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useXP } from '@/contexts/XPContext';
-import PostModal from './PostModal';
 import CreatePostModal from './CreatePostModal';
 import workoutPost1 from '@/assets/workout-post-1.jpg';
 import nutritionPost1 from '@/assets/nutrition-post-1.jpg';
@@ -42,8 +41,8 @@ export interface Post {
 }
 
 const Feed = () => {
-  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [showCreatePost, setShowCreatePost] = useState(false);
+  const [currentImageIndexes, setCurrentImageIndexes] = useState<{[key: string]: number}>({});
   const [posts, setPosts] = useState<Post[]>([
     {
       id: '1',
@@ -209,6 +208,26 @@ const Feed = () => {
   const { toast } = useToast();
   const { addXP } = useXP();
 
+  const nextImage = (postId: string) => {
+    const post = posts.find(p => p.id === postId);
+    if (post && post.images.length > 1) {
+      setCurrentImageIndexes(prev => ({
+        ...prev,
+        [postId]: ((prev[postId] || 0) + 1) % post.images.length
+      }));
+    }
+  };
+
+  const prevImage = (postId: string) => {
+    const post = posts.find(p => p.id === postId);
+    if (post && post.images.length > 1) {
+      setCurrentImageIndexes(prev => ({
+        ...prev,
+        [postId]: ((prev[postId] || 0) - 1 + post.images.length) % post.images.length
+      }));
+    }
+  };
+
   const handleLike = (postId: string) => {
     setPosts(posts.map(post => {
       if (post.id === postId) {
@@ -268,11 +287,12 @@ const Feed = () => {
 
       {/* Posts Feed */}
       <div className="p-4 space-y-4">
-        {posts.map((post) => (
+        {posts.map((post) => {
+          const currentImageIndex = currentImageIndexes[post.id] || 0;
+          return (
           <Card
             key={post.id}
-            className="fitness-card overflow-hidden cursor-pointer"
-            onClick={() => setSelectedPost(post)}
+            className="fitness-card overflow-hidden"
           >
             {/* Post Header */}
             <div className="p-4 pb-2">
@@ -289,16 +309,30 @@ const Feed = () => {
             </div>
 
             {/* Post Image */}
-            <div className="post-image-container">
+            <div className="post-image-container relative">
               <img
-                src={post.images[0]}
+                src={post.images[currentImageIndex]}
                 alt="Post"
                 className="w-full h-full object-cover"
               />
               {post.images.length > 1 && (
-                <div className="absolute top-3 right-3 bg-black/60 text-white text-xs px-2 py-1 rounded-full">
-                  1/{post.images.length}
-                </div>
+                <>
+                  <button
+                    onClick={() => prevImage(post.id)}
+                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white p-2 rounded-full z-10"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => nextImage(post.id)}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black/80 text-white p-2 rounded-full z-10"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                  <div className="absolute top-3 right-3 bg-black/60 text-white text-xs px-2 py-1 rounded-full">
+                    {currentImageIndex + 1}/{post.images.length}
+                  </div>
+                </>
               )}
             </div>
 
@@ -405,23 +439,16 @@ const Feed = () => {
                 </div>
               </div>
           </Card>
-        ))}
+          );
+        })}
       </div>
 
       {/* Modals */}
-      {selectedPost && (
-        <PostModal
-          post={selectedPost}
-          isOpen={!!selectedPost}
-          onClose={() => setSelectedPost(null)}
-        />
-      )}
-      
-        <CreatePostModal
-          isOpen={showCreatePost}
-          onClose={() => setShowCreatePost(false)}
-          onCreatePost={addNewPost}
-        />
+      <CreatePostModal
+        isOpen={showCreatePost}
+        onClose={() => setShowCreatePost(false)}
+        onCreatePost={addNewPost}
+      />
     </div>
   );
 };
