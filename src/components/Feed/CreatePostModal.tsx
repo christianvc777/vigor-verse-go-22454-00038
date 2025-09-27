@@ -11,9 +11,10 @@ import trainerAvatar from '@/assets/trainer-avatar.jpg';
 interface CreatePostModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onCreatePost?: (newPost: any) => void;
 }
 
-const CreatePostModal = ({ isOpen, onClose }: CreatePostModalProps) => {
+const CreatePostModal = ({ isOpen, onClose, onCreatePost }: CreatePostModalProps) => {
   const [content, setContent] = useState('');
   const [location, setLocation] = useState('');
   const [images, setImages] = useState<string[]>([]);
@@ -56,7 +57,19 @@ const CreatePostModal = ({ isOpen, onClose }: CreatePostModalProps) => {
 
     setIsLoading(true);
     
-    // Simulate API call
+    // Create new post
+    if (onCreatePost) {
+      onCreatePost({
+        user: { id: 'me', name: user.name, avatar: user.avatar },
+        content,
+        images,
+        timestamp: 'Ahora',
+        location: location || 'Mi ubicación',
+        tags: content.match(/#\w+/g)?.map(tag => tag.substring(1)) || [],
+        postType: 'regular'
+      });
+    }
+    
     setTimeout(() => {
       toast({
         title: "¡Publicación creada!",

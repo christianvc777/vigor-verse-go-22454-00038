@@ -2,12 +2,21 @@ import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 import { Heart, MessageCircle, Share, Plus } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { useXP } from '@/contexts/XPContext';
 import PostModal from './PostModal';
 import CreatePostModal from './CreatePostModal';
 import workoutPost1 from '@/assets/workout-post-1.jpg';
 import nutritionPost1 from '@/assets/nutrition-post-1.jpg';
 import groupFitnessPost from '@/assets/group-fitness-post.jpg';
+import doctorSpecialist from '@/assets/doctor-specialist.jpg';
+import proteinSupplements from '@/assets/protein-supplements.jpg';
+import smartwatchFitness from '@/assets/smartwatch-fitness.jpg';
+import healthyColombianMeal from '@/assets/healthy-colombian-meal.jpg';
+import quinoaSaladRecipe from '@/assets/quinoa-salad-recipe.jpg';
+import fitnessPointsTrainer from '@/assets/fitness-tips-trainer.jpg';
 import trainerAvatar from '@/assets/trainer-avatar.jpg';
 
 export interface User {
@@ -27,14 +36,15 @@ export interface Post {
   location: string;
   isLiked: boolean;
   tags?: string[];
+  postType?: 'regular' | 'service' | 'product' | 'recipe' | 'specialist';
+  price?: string;
+  whatsappNumber?: string;
 }
 
 const Feed = () => {
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [showCreatePost, setShowCreatePost] = useState(false);
-
-  // Sample posts with default fitness images
-  const [posts] = useState<Post[]>([
+  const [posts, setPosts] = useState<Post[]>([
     {
       id: '1',
       user: {
@@ -50,6 +60,7 @@ const Feed = () => {
       location: 'Bodytech La 93',
       isLiked: false,
       tags: ['fitness', 'workout', 'motivation'],
+      postType: 'regular'
     },
     {
       id: '2',
@@ -66,6 +77,7 @@ const Feed = () => {
       location: 'Smart Fit Chapinero',
       isLiked: true,
       tags: ['nutrition', 'mealprep', 'healthy'],
+      postType: 'regular'
     },
     {
       id: '3',
@@ -82,8 +94,158 @@ const Feed = () => {
       location: 'Gold\'s Gym Zona Rosa',
       isLiked: false,
       tags: ['hiit', 'group', 'energy'],
+      postType: 'regular'
     },
+    {
+      id: '4',
+      user: {
+        id: '4',
+        name: 'Dr. Ana Rodríguez',
+        avatar: trainerAvatar,
+      },
+      content: '🩺 Consultas virtuales de medicina deportiva disponibles. Evaluación postural, lesiones y planes de recuperación personalizados.',
+      images: [doctorSpecialist],
+      likes: 67,
+      comments: 12,
+      timestamp: 'Hace 1 hora',
+      location: 'Clínica Deportiva Médica',
+      isLiked: false,
+      tags: ['medicina', 'consulta', 'deportiva'],
+      postType: 'service',
+      price: '$150.000 COP',
+      whatsappNumber: '+573001234567'
+    },
+    {
+      id: '5',
+      user: {
+        id: '5',
+        name: 'FitStore Colombia',
+        avatar: trainerAvatar,
+      },
+      content: '💪 Proteína Whey Premium con 25g de proteína por porción. ¡Perfecta para tu post-entreno! Envío gratis en Bogotá.',
+      images: [proteinSupplements],
+      likes: 203,
+      comments: 38,
+      timestamp: 'Hace 3 horas',
+      location: 'Tienda Online',
+      isLiked: false,
+      tags: ['proteina', 'suplementos', 'whey'],
+      postType: 'product',
+      price: '$89.000 COP',
+      whatsappNumber: '+573009876543'
+    },
+    {
+      id: '6',
+      user: {
+        id: '6',
+        name: 'TechFit Store',
+        avatar: trainerAvatar,
+      },
+      content: '⌚ Apple Watch Series 9 - Tu compañero perfecto de entrenamiento. Monitoreo de signos vitales, GPS, resistente al agua.',
+      images: [smartwatchFitness],
+      likes: 445,
+      comments: 76,
+      timestamp: 'Hace 5 horas',
+      location: 'Centro Comercial Andino',
+      isLiked: true,
+      tags: ['smartwatch', 'apple', 'tecnologia'],
+      postType: 'product',
+      price: '$1.299.000 COP',
+      whatsappNumber: '+573005555555'
+    },
+    {
+      id: '7',
+      user: {
+        id: '7',
+        name: 'Chef Saludable Laura',
+        avatar: trainerAvatar,
+      },
+      content: '🥘 Receta: Bandeja Paisa Saludable - Versión fitness de nuestro plato tradicional. Rica en proteína y baja en grasa.',
+      images: [healthyColombianMeal],
+      likes: 312,
+      comments: 89,
+      timestamp: 'Hace 8 horas',
+      location: 'Cocina Fitness',
+      isLiked: false,
+      tags: ['receta', 'colombiana', 'saludable'],
+      postType: 'recipe'
+    },
+    {
+      id: '8',
+      user: {
+        id: '8',
+        name: 'NutriVida',
+        avatar: trainerAvatar,
+      },
+      content: '🥗 Bowl de Quinoa Power: La combinación perfecta de proteínas vegetales y nutrientes. ¡Energía para todo el día!',
+      images: [quinoaSaladRecipe],
+      likes: 178,
+      comments: 45,
+      timestamp: 'Hace 12 horas',
+      location: 'Restaurante Saludable',
+      isLiked: true,
+      tags: ['quinoa', 'vegetariano', 'bowl'],
+      postType: 'recipe'
+    },
+    {
+      id: '9',
+      user: {
+        id: '9',
+        name: 'Coach Fitness Pro',
+        avatar: trainerAvatar,
+      },
+      content: '💡 TIP: La hidratación es clave para el rendimiento. Bebe agua antes, durante y después del ejercicio. ¡Tu cuerpo te lo agradecerá!',
+      images: [fitnessPointsTrainer],
+      likes: 267,
+      comments: 34,
+      timestamp: 'Hace 1 día',
+      location: 'Gimnasio Virtual',
+      isLiked: false,
+      tags: ['tips', 'hidratacion', 'consejo'],
+      postType: 'regular'
+    }
   ]);
+
+  const { toast } = useToast();
+  const { addXP } = useXP();
+
+  const handleLike = (postId: string) => {
+    setPosts(posts.map(post => {
+      if (post.id === postId) {
+        const newIsLiked = !post.isLiked;
+        const newLikes = newIsLiked ? post.likes + 1 : post.likes - 1;
+        
+        if (newIsLiked) {
+          addXP(25, 'Me gusta en post');
+        }
+        
+        return { ...post, isLiked: newIsLiked, likes: newLikes };
+      }
+      return post;
+    }));
+  };
+
+  const openWhatsApp = (phoneNumber: string, message: string) => {
+    const encodedMessage = encodeURIComponent(message);
+    window.open(`https://wa.me/${phoneNumber}?text=${encodedMessage}`, '_blank');
+  };
+
+  const openChat = (userId: string, userName: string) => {
+    addXP(50, 'Chat iniciado');
+    window.location.href = '/chat';
+  };
+
+  const addNewPost = (newPost: Omit<Post, 'id' | 'likes' | 'comments' | 'isLiked'>) => {
+    const post: Post = {
+      ...newPost,
+      id: Date.now().toString(),
+      likes: 0,
+      comments: 0,
+      isLiked: false
+    };
+    setPosts(prev => [post, ...prev]);
+    addXP(100, 'Nueva publicación creada');
+  };
 
   return (
     <div className="max-w-md mx-auto bg-background min-h-screen">
@@ -140,65 +302,71 @@ const Feed = () => {
               )}
             </div>
 
-            {/* Post Actions */}
-            <div className="p-4">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-4">
+              {/* Post Content with Enhanced Features */}
+              <div className="p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-4">
+                    // ... keep existing like and message buttons
+                  </div>
+                </div>
+
+                <p className="font-semibold text-sm mb-1">
+                  {post.likes} Me gusta
+                </p>
+
+                <p className="text-sm mb-2">
+                  <span className="font-semibold">{post.user.name}</span>{' '}
+                  {post.content}
+                </p>
+
+                {/* Price and Service Info */}
+                {post.price && (
+                  <div className="flex items-center gap-2 mb-2">
+                    <Badge variant="secondary" className="text-primary font-semibold">
+                      {post.price}
+                    </Badge>
+                    {post.postType === 'service' && (
+                      <Badge variant="outline">Servicio</Badge>
+                    )}
+                    {post.postType === 'product' && (
+                      <Badge variant="outline">Producto</Badge>
+                    )}
+                  </div>
+                )}
+
+                {/* WhatsApp Contact Button */}
+                {post.whatsappNumber && (
                   <Button
-                    variant="ghost"
                     size="sm"
-                    className={`${post.isLiked ? 'text-red-500' : 'text-muted-foreground'} hover:text-red-500 p-0`}
-                    onClick={(e) => e.stopPropagation()}
+                    className="fitness-button-primary mb-2"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openWhatsApp(post.whatsappNumber!, `Hola! Vi tu ${post.postType === 'service' ? 'servicio' : 'producto'} en ZestWell: ${post.content.substring(0, 50)}...`);
+                    }}
                   >
-                    <Heart className={`w-5 h-5 ${post.isLiked ? 'fill-current' : ''}`} />
+                    Contactar por WhatsApp
                   </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-muted-foreground hover:text-foreground p-0"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <MessageCircle className="w-5 h-5" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="text-muted-foreground hover:text-foreground p-0"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <Share className="w-5 h-5" />
-                  </Button>
+                )}
+
+                {post.tags && (
+                  <div className="flex flex-wrap gap-1 mb-2">
+                    {post.tags.map((tag, index) => (
+                      <span key={index} className="text-primary text-xs hover:underline cursor-pointer">
+                        #{tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                <div className="flex items-center justify-between">
+                  <p className="text-xs text-muted-foreground">
+                    Ver los {post.comments} comentarios
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {post.timestamp}
+                  </p>
                 </div>
               </div>
-
-              <p className="font-semibold text-sm mb-1">
-                {post.likes} Me gusta
-              </p>
-
-              <p className="text-sm mb-2">
-                <span className="font-semibold">{post.user.name}</span>{' '}
-                {post.content}
-              </p>
-
-              {post.tags && (
-                <div className="flex flex-wrap gap-1 mb-2">
-                  {post.tags.map((tag, index) => (
-                    <span key={index} className="text-primary text-xs hover:underline cursor-pointer">
-                      #{tag}
-                    </span>
-                  ))}
-                </div>
-              )}
-
-              <div className="flex items-center justify-between">
-                <p className="text-xs text-muted-foreground">
-                  Ver los {post.comments} comentarios
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {post.timestamp}
-                </p>
-              </div>
-            </div>
           </Card>
         ))}
       </div>
@@ -212,10 +380,11 @@ const Feed = () => {
         />
       )}
       
-      <CreatePostModal
-        isOpen={showCreatePost}
-        onClose={() => setShowCreatePost(false)}
-      />
+        <CreatePostModal
+          isOpen={showCreatePost}
+          onClose={() => setShowCreatePost(false)}
+          onCreatePost={addNewPost}
+        />
     </div>
   );
 };
