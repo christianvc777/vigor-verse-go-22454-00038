@@ -24,14 +24,24 @@ import ShareModal from './ShareModal';
 import DashboardModal from './DashboardModal';
 import ConfigModal from './ConfigModal';
 import FavoritesModal from './FavoritesModal';
+import AchievementsModal from './AchievementsModal';
+import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
 import trainerAvatar from '@/assets/trainer-avatar.jpg';
 
 const Perfil = () => {
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [showShare, setShowShare] = useState(false);
-  const [showDashboard, setShowDashboard] = useState(false);
+const [showDashboard, setShowDashboard] = useState(false);
   const [showConfig, setShowConfig] = useState(false);
   const [showFavorites, setShowFavorites] = useState(false);
+  const [showAchievements, setShowAchievements] = useState(false);
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate('/auth');
+  };
 
   const userProfile = {
     name: 'Carlos Fitness',
@@ -192,6 +202,7 @@ const Perfil = () => {
           <Button
             variant="outline"
             className="flex flex-col items-center py-4 h-auto"
+            onClick={() => setShowAchievements(true)}
           >
             <Trophy className="w-5 h-5 mb-1" />
             <span className="text-xs">Logros</span>
@@ -319,6 +330,10 @@ const Perfil = () => {
       <FavoritesModal
         isOpen={showFavorites}
         onClose={() => setShowFavorites(false)}
+      />
+      <AchievementsModal
+        isOpen={showAchievements}
+        onClose={() => setShowAchievements(false)}
       />
     </div>
   );

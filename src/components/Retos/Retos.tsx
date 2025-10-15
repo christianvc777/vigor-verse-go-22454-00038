@@ -27,8 +27,7 @@ export interface Challenge {
 const Retos = () => {
   const [selectedChallenge, setSelectedChallenge] = useState<Challenge | null>(null);
   const [showProgress, setShowProgress] = useState(false);
-
-  const popularChallenges: Challenge[] = [
+  const [challenges, setChallenges] = useState<Challenge[]>([
     {
       id: '1',
       title: '30 Días de Cardio',
@@ -77,26 +76,6 @@ const Retos = () => {
       requirements: ['15 minutos diarios de stretching', 'Registrar progreso semanal', 'Completar evaluación inicial'],
       rules: ['Mantener posiciones mínimo 30 segundos', 'No forzar movimientos', 'Calentar antes de estirar'],
     },
-  ];
-
-  const myProgress: Challenge[] = [
-    {
-      id: '2',
-      title: 'Fuerza Total',
-      description: 'Incrementa tu fuerza en ejercicios compuestos',
-      difficulty: 'Difícil',
-      duration: '8 semanas',
-      participants: 890,
-      prize: 'Kit de suplementos',
-      startDate: '2024-09-15',
-      endDate: '2024-11-10',
-      image: '/api/placeholder/300/200',
-      isJoined: true,
-      category: 'Fuerza',
-      requirements: [],
-      rules: [],
-      progress: 65,
-    },
     {
       id: '4',
       title: 'Hidratación Saludable',
@@ -131,11 +110,14 @@ const Retos = () => {
       rules: [],
       progress: 42,
     },
-  ];
+  ]);
 
   const handleJoinChallenge = (challengeId: string) => {
-    console.log('Joining challenge:', challengeId);
-    // Here you would handle joining the challenge
+    setChallenges(challenges.map(challenge => 
+      challenge.id === challengeId 
+        ? { ...challenge, isJoined: !challenge.isJoined }
+        : challenge
+    ));
   };
 
   const getDifficultyColor = (difficulty: string) => {
@@ -166,7 +148,7 @@ const Retos = () => {
           </h2>
           
           <div className="space-y-4">
-            {popularChallenges.map((challenge) => (
+            {challenges.filter(c => !c.isJoined).map((challenge) => (
               <Card key={challenge.id} className="fitness-card p-4">
                 <div className="flex justify-between items-start mb-3">
                   <div className="flex-1">
@@ -238,7 +220,7 @@ const Retos = () => {
           </div>
 
           <div className="space-y-4">
-            {myProgress.map((challenge) => (
+            {challenges.filter(c => c.isJoined).map((challenge) => (
               <Card key={challenge.id} className="fitness-card p-4">
                 <div className="flex justify-between items-start mb-3">
                   <div className="flex-1">
@@ -296,7 +278,7 @@ const Retos = () => {
       <ProgressModal
         isOpen={showProgress}
         onClose={() => setShowProgress(false)}
-        challenges={myProgress}
+        challenges={challenges.filter(c => c.isJoined)}
       />
     </div>
   );

@@ -30,8 +30,7 @@ export interface Event {
 const Eventos = () => {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
   const [showCreateEvent, setShowCreateEvent] = useState(false);
-
-  const events: Event[] = [
+  const [events, setEvents] = useState<Event[]>([
     {
       id: '1',
       title: 'Yoga Matutino',
@@ -112,11 +111,28 @@ const Eventos = () => {
       duration: '45 minutos',
       level: 'Principiante',
     },
-  ];
+  ]);
 
   const handleRegister = (eventId: string) => {
-    console.log('Registering for event:', eventId);
-    // Handle registration logic here
+    setEvents(events.map(event => 
+      event.id === eventId 
+        ? { ...event, isRegistered: !event.isRegistered, registered: event.isRegistered ? event.registered - 1 : event.registered + 1 }
+        : event
+    ));
+  };
+
+  const handleCreateEvent = (newEvent: any) => {
+    const event = {
+      ...newEvent,
+      id: `event-${events.length + 1}`,
+      image: '/api/placeholder/300/200',
+      isRegistered: false,
+      requirements: [],
+      whatToBring: [],
+      duration: '60 minutos',
+      address: newEvent.location,
+    };
+    setEvents([event, ...events]);
   };
 
   const getLevelColor = (level: string) => {
@@ -240,6 +256,7 @@ const Eventos = () => {
       <CreateEventModal
         isOpen={showCreateEvent}
         onClose={() => setShowCreateEvent(false)}
+        onCreateEvent={handleCreateEvent}
       />
     </div>
   );

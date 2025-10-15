@@ -11,9 +11,10 @@ import { useToast } from '@/hooks/use-toast';
 interface CreateEventModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onCreateEvent?: (event: any) => void;
 }
 
-const CreateEventModal = ({ isOpen, onClose }: CreateEventModalProps) => {
+const CreateEventModal = ({ isOpen, onClose, onCreateEvent }: CreateEventModalProps) => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
