@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, MapPin, Users, Clock, Plus, Info } from 'lucide-react';
 import EventModal from './EventModal';
 import CreateEventModal from './CreateEventModal';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface Event {
   id: string;
@@ -112,6 +113,41 @@ const Eventos = () => {
       level: 'Principiante',
     },
   ]);
+
+  useEffect(() => {
+    loadEvents();
+  }, []);
+
+  const loadEvents = async () => {
+    const { data, error } = await (supabase as any)
+      .from('events')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (!error && data) {
+      const formattedEvents = data.map((event: any) => ({
+        id: event.id,
+        title: event.title,
+        description: event.description || '',
+        date: event.date,
+        time: event.time,
+        location: event.location,
+        address: event.location,
+        instructor: event.instructor,
+        capacity: event.capacity,
+        registered: event.registered || 0,
+        price: event.price,
+        category: event.category,
+        image: '/api/placeholder/300/200',
+        isRegistered: false,
+        requirements: [],
+        whatToBring: [],
+        duration: '60 minutos',
+        level: event.level as 'Principiante' | 'Intermedio' | 'Avanzado',
+      }));
+      setEvents(formattedEvents);
+    }
+  };
 
   const handleRegister = (eventId: string) => {
     setEvents(events.map(event => 

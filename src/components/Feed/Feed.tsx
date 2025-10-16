@@ -272,7 +272,7 @@ const Feed = () => {
       <div className="sticky top-0 bg-card/80 backdrop-blur-md z-30 p-4 border-b border-border">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold bg-gradient-hero bg-clip-text text-transparent">
-            ZestWell
+            Teso
           </h1>
           <Button
             onClick={() => setShowCreatePost(true)}
@@ -412,7 +412,7 @@ const Feed = () => {
                     className="fitness-button-primary mb-2"
                     onClick={(e) => {
                       e.stopPropagation();
-                      openWhatsApp(post.whatsappNumber!, `Hola! Vi tu ${post.postType === 'service' ? 'servicio' : 'producto'} en ZestWell: ${post.content.substring(0, 50)}...`);
+                      openWhatsApp(post.whatsappNumber!, `Hola! Vi tu ${post.postType === 'service' ? 'servicio' : 'producto'} en Teso: ${post.content.substring(0, 50)}...`);
                     }}
                   >
                     Contactar por WhatsApp

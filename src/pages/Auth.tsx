@@ -102,7 +102,7 @@ const Auth = () => {
               <Dumbbell className="w-8 h-8 text-primary" />
             </div>
           </div>
-          <h1 className="text-3xl font-bold">FitConnect</h1>
+          <h1 className="text-3xl font-bold">Teso</h1>
           <p className="text-muted-foreground">
             {isLogin ? 'Inicia sesión en tu cuenta' : 'Crea tu cuenta'}
           </p>

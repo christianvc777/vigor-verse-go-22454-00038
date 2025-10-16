@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { Calendar, MapPin, Users, DollarSign, Clock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface CreateEventModalProps {
   isOpen: boolean;
@@ -54,31 +55,75 @@ const CreateEventModal = ({ isOpen, onClose, onCreateEvent }: CreateEventModalPr
 
     setIsLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
+    const { data: { user } } = await supabase.auth.getUser();
+    
+    if (!user) {
       toast({
-        title: "¡Evento creado!",
-        description: "Tu evento ha sido creado exitosamente",
+        title: 'Error',
+        description: 'Debes iniciar sesión para crear eventos',
+        variant: 'destructive',
       });
       setIsLoading(false);
-      setFormData({
-        title: '',
-        description: '',
-        date: '',
-        time: '',
-        location: '',
-        address: '',
-        instructor: '',
-        capacity: '',
-        price: '',
-        category: '',
-        level: '',
-        duration: '',
-        requirements: '',
-        whatToBring: '',
+      return;
+    }
+
+    const { error } = await (supabase as any)
+      .from('events')
+      .insert([
+        {
+          title: formData.title,
+          description: formData.description,
+          date: formData.date,
+          time: formData.time,
+          location: formData.location,
+          instructor: formData.instructor,
+          capacity: parseInt(formData.capacity) || 0,
+          price: parseFloat(formData.price) || 0,
+          category: formData.category,
+          level: formData.level,
+          user_id: user.id,
+        },
+      ]);
+
+    setIsLoading(false);
+
+    if (error) {
+      toast({
+        title: 'Error',
+        description: 'No se pudo crear el evento',
+        variant: 'destructive',
       });
-      onClose();
-    }, 2000);
+      return;
+    }
+
+    toast({
+      title: "¡Evento creado!",
+      description: "Tu evento ha sido creado exitosamente",
+    });
+    
+    setFormData({
+      title: '',
+      description: '',
+      date: '',
+      time: '',
+      location: '',
+      address: '',
+      instructor: '',
+      capacity: '',
+      price: '',
+      category: '',
+      level: '',
+      duration: '',
+      requirements: '',
+      whatToBring: '',
+    });
+    
+    if (onCreateEvent) {
+      onCreateEvent(formData);
+    }
+    
+    onClose();
+    window.location.reload();
   };
 
   return (

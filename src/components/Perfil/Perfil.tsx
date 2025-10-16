@@ -17,7 +17,8 @@ import {
   Award,
   Bookmark,
   Users,
-  MessageCircle
+  MessageCircle,
+  LogOut
 } from 'lucide-react';
 import EditProfileModal from './EditProfileModal';
 import ShareModal from './ShareModal';
@@ -27,6 +28,7 @@ import FavoritesModal from './FavoritesModal';
 import AchievementsModal from './AchievementsModal';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
 import trainerAvatar from '@/assets/trainer-avatar.jpg';
 
 const Perfil = () => {
@@ -37,9 +39,14 @@ const [showDashboard, setShowDashboard] = useState(false);
   const [showFavorites, setShowFavorites] = useState(false);
   const [showAchievements, setShowAchievements] = useState(false);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
+    toast({
+      title: 'Sesión cerrada',
+      description: 'Has cerrado sesión correctamente',
+    });
     navigate('/auth');
   };
 
@@ -99,6 +106,13 @@ const [showDashboard, setShowDashboard] = useState(false);
               onClick={() => setShowEditProfile(true)}
             >
               <Edit className="w-5 h-5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleLogout}
+            >
+              <LogOut className="w-5 h-5" />
             </Button>
           </div>
         </div>
@@ -268,6 +282,42 @@ const [showDashboard, setShowDashboard] = useState(false);
                   <div className="flex-1">
                     <p className="font-medium text-sm">Te uniste al evento "HIIT Intensivo"</p>
                     <p className="text-xs text-muted-foreground">Hace 1 semana</p>
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="fitness-card p-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-8 h-8 bg-warning/20 rounded-full flex items-center justify-center">
+                    <Trophy className="w-4 h-4 text-warning" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium text-sm">Lograste el badge "Fuerza Legendaria"</p>
+                    <p className="text-xs text-muted-foreground">Hace 2 semanas</p>
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="fitness-card p-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-8 h-8 bg-success/20 rounded-full flex items-center justify-center">
+                    <Target className="w-4 h-4 text-success" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium text-sm">Completaste 5 entrenamientos esta semana</p>
+                    <p className="text-xs text-muted-foreground">Hace 3 días</p>
+                  </div>
+                </div>
+              </Card>
+
+              <Card className="fitness-card p-4">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
+                    <Heart className="w-4 h-4 text-primary" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium text-sm">Quemaste 2,500 calorías esta semana</p>
+                    <p className="text-xs text-muted-foreground">Hace 5 días</p>
                   </div>
                 </div>
               </Card>

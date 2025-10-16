@@ -5,6 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Camera } from 'lucide-react';
 
 interface EditProfileModalProps {
   isOpen: boolean;
@@ -18,7 +20,19 @@ const EditProfileModal = ({ isOpen, onClose, profile }: EditProfileModalProps) =
     name: profile.name,
     username: profile.username,
     bio: profile.bio,
+    avatar: profile.avatar,
   });
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData({ ...formData, avatar: reader.result as string });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleSave = () => {
     toast({
@@ -35,6 +49,25 @@ const EditProfileModal = ({ isOpen, onClose, profile }: EditProfileModalProps) =
           <DialogTitle>Editar Perfil</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
+          <div className="flex flex-col items-center gap-4">
+            <Avatar className="w-24 h-24">
+              <AvatarImage src={formData.avatar} />
+              <AvatarFallback>{formData.name?.[0] || 'U'}</AvatarFallback>
+            </Avatar>
+            <Label htmlFor="avatar" className="cursor-pointer">
+              <div className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90">
+                <Camera className="w-4 h-4" />
+                <span>Cambiar foto</span>
+              </div>
+              <Input
+                id="avatar"
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="hidden"
+              />
+            </Label>
+          </div>
           <div className="space-y-2">
             <Label htmlFor="name">Nombre</Label>
             <Input
