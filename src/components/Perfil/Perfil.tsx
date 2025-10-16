@@ -34,23 +34,14 @@ import trainerAvatar from '@/assets/trainer-avatar.jpg';
 const Perfil = () => {
   const [showEditProfile, setShowEditProfile] = useState(false);
   const [showShare, setShowShare] = useState(false);
-const [showDashboard, setShowDashboard] = useState(false);
+  const [showDashboard, setShowDashboard] = useState(false);
   const [showConfig, setShowConfig] = useState(false);
   const [showFavorites, setShowFavorites] = useState(false);
   const [showAchievements, setShowAchievements] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    toast({
-      title: 'Sesión cerrada',
-      description: 'Has cerrado sesión correctamente',
-    });
-    navigate('/auth');
-  };
-
-  const userProfile = {
+  const [userProfile, setUserProfile] = useState({
     name: 'Carlos Fitness',
     username: '@carlosfitness',
     bio: 'Entrenador personal certificado | Transformando vidas a través del fitness 💪',
@@ -61,6 +52,19 @@ const [showDashboard, setShowDashboard] = useState(false);
     location: 'Bogotá, Colombia',
     joined: 'Enero 2023',
     verified: true,
+  });
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    toast({
+      title: 'Sesión cerrada',
+      description: 'Has cerrado sesión correctamente',
+    });
+    navigate('/auth');
+  };
+
+  const handleProfileUpdate = (updatedData: any) => {
+    setUserProfile({ ...userProfile, ...updatedData });
   };
 
   const weeklyStats = {
@@ -358,6 +362,7 @@ const [showDashboard, setShowDashboard] = useState(false);
         isOpen={showEditProfile}
         onClose={() => setShowEditProfile(false)}
         profile={userProfile}
+        onUpdate={handleProfileUpdate}
       />
       
       <ShareModal
