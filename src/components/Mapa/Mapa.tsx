@@ -148,7 +148,6 @@ const Mapa = () => {
             className="flex items-center gap-1"
           >
             <Navigation className="w-4 h-4" />
-            <ExternalLink className="w-3 h-3" />
           </Button>
         </div>
       </div>

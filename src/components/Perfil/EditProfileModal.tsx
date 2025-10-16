@@ -35,11 +35,20 @@ const EditProfileModal = ({ isOpen, onClose, profile }: EditProfileModalProps) =
   };
 
   const handleSave = () => {
+    // Actualizar el perfil en el componente padre
+    if (profile.avatar !== formData.avatar) {
+      profile.avatar = formData.avatar;
+    }
+    profile.name = formData.name;
+    profile.username = formData.username;
+    profile.bio = formData.bio;
+    
     toast({
       title: 'Perfil actualizado',
       description: 'Tus cambios han sido guardados',
     });
     onClose();
+    window.location.reload();
   };
 
   return (

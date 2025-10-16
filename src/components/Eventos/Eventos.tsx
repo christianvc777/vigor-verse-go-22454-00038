@@ -124,6 +124,89 @@ const Eventos = () => {
       .select('*')
       .order('created_at', { ascending: false });
 
+    const defaultEvents = [
+      {
+        id: '1',
+        title: 'Yoga Matutino',
+        description: 'Sesión de yoga para comenzar el día con energía positiva y relajación',
+        date: '2024-10-15',
+        time: '07:00',
+        location: 'Bodytech 93',
+        address: 'Calle 93 #11-27, Bogotá',
+        instructor: 'Ana María González',
+        capacity: 20,
+        registered: 12,
+        price: 25000,
+        category: 'Yoga',
+        image: '/api/placeholder/300/200',
+        isRegistered: false,
+        requirements: ['Esterilla de yoga', 'Ropa cómoda', 'Toalla pequeña'],
+        whatToBring: ['Botella de agua', 'Esterilla propia (opcional)'],
+        duration: '60 minutos',
+        level: 'Principiante' as const,
+      },
+      {
+        id: '2',
+        title: 'HIIT Intensivo',
+        description: 'Entrenamiento de alta intensidad para quemar calorías y tonificar',
+        date: '2024-10-16',
+        time: '18:30',
+        location: 'Smart Fit Chapinero',
+        address: 'Carrera 13 #63-42, Bogotá',
+        instructor: 'Carlos Ruiz',
+        capacity: 15,
+        registered: 8,
+        price: 35000,
+        category: 'HIIT',
+        image: '/api/placeholder/300/200',
+        isRegistered: true,
+        requirements: ['Nivel físico intermedio', 'Calzado deportivo'],
+        whatToBring: ['Botella de agua', 'Toalla', 'Ropa deportiva'],
+        duration: '45 minutos',
+        level: 'Intermedio' as const,
+      },
+      {
+        id: '3',
+        title: 'Spinning Challenge',
+        description: 'Desafío de spinning con música motivacional y competencia amigable',
+        date: '2024-10-18',
+        time: '19:00',
+        location: 'Gold\'s Gym Zona Rosa',
+        address: 'Calle 84 #13-54, Bogotá',
+        instructor: 'María Fernanda López',
+        capacity: 25,
+        registered: 18,
+        price: 30000,
+        category: 'Spinning',
+        image: '/api/placeholder/300/200',
+        isRegistered: false,
+        requirements: ['Experiencia básica en spinning', 'Resistencia cardiovascular'],
+        whatToBring: ['Botella de agua grande', 'Toalla', 'Zapatos con clip (opcional)'],
+        duration: '50 minutos',
+        level: 'Intermedio' as const,
+      },
+      {
+        id: '4',
+        title: 'Aqua Fitness',
+        description: 'Ejercicios acuáticos de bajo impacto para todas las edades',
+        date: '2024-10-20',
+        time: '10:00',
+        location: 'Club El Nogal',
+        address: 'Carrera 7 #73-55, Bogotá',
+        instructor: 'Sandra Morales',
+        capacity: 12,
+        registered: 7,
+        price: 40000,
+        category: 'Aqua',
+        image: '/api/placeholder/300/200',
+        isRegistered: false,
+        requirements: ['Saber nadar (básico)', 'Traje de baño'],
+        whatToBring: ['Traje de baño', 'Toalla', 'Gafas de natación'],
+        duration: '45 minutos',
+        level: 'Principiante' as const,
+      },
+    ];
+
     if (!error && data) {
       const formattedEvents = data.map((event: any) => ({
         id: event.id,
@@ -145,7 +228,9 @@ const Eventos = () => {
         duration: '60 minutos',
         level: event.level as 'Principiante' | 'Intermedio' | 'Avanzado',
       }));
-      setEvents(formattedEvents);
+      setEvents([...formattedEvents, ...defaultEvents]);
+    } else {
+      setEvents(defaultEvents);
     }
   };
 
