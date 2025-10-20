@@ -16,6 +16,7 @@ import Eventos from "./components/Eventos/Eventos";
 import Mapa from "./components/Mapa/Mapa";
 import Perfil from "./components/Perfil/Perfil";
 import Auth from "./pages/Auth";
+import AdminKPIs from "./pages/AdminKPIs";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -57,6 +58,7 @@ const App = () => {
           <BrowserRouter>
             <Routes>
               <Route path="/auth" element={!session ? <Auth /> : <Navigate to="/" replace />} />
+              <Route path="/admin/kpis" element={session ? <AdminKPIs /> : <Navigate to="/auth" replace />} />
               <Route path="/" element={session ? <Layout /> : <Navigate to="/auth" replace />}>
                 <Route index element={<Feed />} />
                 <Route path="social" element={<Social />} />

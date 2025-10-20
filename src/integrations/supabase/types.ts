@@ -14,16 +14,436 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      activity_events: {
+        Row: {
+          created_at: string | null
+          event_type: Database["public"]["Enums"]["event_type"]
+          id: string
+          metadata: Json | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          event_type: Database["public"]["Enums"]["event_type"]
+          id?: string
+          metadata?: Json | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          event_type?: Database["public"]["Enums"]["event_type"]
+          id?: string
+          metadata?: Json | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_events_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          capacity: number
+          category: string
+          created_at: string | null
+          date: string
+          description: string | null
+          id: string
+          image_url: string | null
+          instructor: string
+          level: string
+          location: string
+          price: number
+          registered: number | null
+          time: string
+          title: string
+          user_id: string | null
+        }
+        Insert: {
+          capacity: number
+          category: string
+          created_at?: string | null
+          date: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          instructor: string
+          level: string
+          location: string
+          price: number
+          registered?: number | null
+          time: string
+          title: string
+          user_id?: string | null
+        }
+        Update: {
+          capacity?: number
+          category?: string
+          created_at?: string | null
+          date?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          instructor?: string
+          level?: string
+          location?: string
+          price?: number
+          registered?: number | null
+          time?: string
+          title?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      post_comments: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_comments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      post_likes: {
+        Row: {
+          created_at: string | null
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_likes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_likes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      posts: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          image_urls: string[] | null
+          location: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          image_urls?: string[] | null
+          location?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          image_urls?: string[] | null
+          location?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "posts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string | null
+          full_name: string | null
+          id: string
+          updated_at: string | null
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id: string
+          updated_at?: string | null
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id?: string
+          updated_at?: string | null
+          username?: string | null
+        }
+        Relationships: []
+      }
+      storage_usage: {
+        Row: {
+          bucket_name: string
+          created_at: string | null
+          file_path: string
+          file_size: number
+          id: string
+          user_id: string
+        }
+        Insert: {
+          bucket_name: string
+          created_at?: string | null
+          file_path: string
+          file_size: number
+          id?: string
+          user_id: string
+        }
+        Update: {
+          bucket_name?: string
+          created_at?: string | null
+          file_path?: string
+          file_size?: number
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "storage_usage_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_xp: {
+        Row: {
+          created_at: string | null
+          current_level: number
+          id: string
+          total_xp: number
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          current_level?: number
+          id?: string
+          total_xp?: number
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          current_level?: number
+          id?: string
+          total_xp?: number
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_xp_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      xp_transactions: {
+        Row: {
+          action: string
+          amount: number
+          created_at: string | null
+          description: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          action: string
+          amount: number
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          action?: string
+          amount?: number
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "xp_transactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
-      [_ in never]: never
+      kpi_daily_active_users: {
+        Row: {
+          active_users: number | null
+          activity_date: string | null
+        }
+        Relationships: []
+      }
+      kpi_daily_posts: {
+        Row: {
+          post_date: string | null
+          posts_count: number | null
+          unique_users_posting: number | null
+        }
+        Relationships: []
+      }
+      kpi_daily_signups: {
+        Row: {
+          cumulative_signups: number | null
+          signup_date: string | null
+          signups_count: number | null
+        }
+        Relationships: []
+      }
+      kpi_daily_xp_earned: {
+        Row: {
+          avg_xp_per_transaction: number | null
+          total_xp_earned: number | null
+          users_earning_xp: number | null
+          xp_date: string | null
+        }
+        Relationships: []
+      }
+      kpi_engagement_stats: {
+        Row: {
+          active_users: number | null
+          engagement_date: string | null
+          total_comments: number | null
+          total_likes: number | null
+        }
+        Relationships: []
+      }
+      kpi_storage_usage: {
+        Row: {
+          files_uploaded: number | null
+          total_bytes: number | null
+          total_mb: number | null
+          unique_users_uploading: number | null
+          upload_date: string | null
+        }
+        Relationships: []
+      }
+      kpi_xp_stats: {
+        Row: {
+          avg_xp: number | null
+          current_level: number | null
+          max_xp: number | null
+          min_xp: number | null
+          users_at_level: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      [_ in never]: never
+      add_xp_to_user: {
+        Args: {
+          p_action: string
+          p_amount: number
+          p_description?: string
+          p_user_id: string
+        }
+        Returns: undefined
+      }
+      calculate_level: {
+        Args: { xp_amount: number }
+        Returns: number
+      }
+      create_seed_data: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
-      [_ in never]: never
+      event_type:
+        | "signup"
+        | "login"
+        | "post_created"
+        | "post_liked"
+        | "post_commented"
+        | "event_created"
+        | "event_joined"
+        | "xp_earned"
+        | "level_up"
+        | "profile_updated"
+        | "image_uploaded"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +570,20 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      event_type: [
+        "signup",
+        "login",
+        "post_created",
+        "post_liked",
+        "post_commented",
+        "event_created",
+        "event_joined",
+        "xp_earned",
+        "level_up",
+        "profile_updated",
+        "image_uploaded",
+      ],
+    },
   },
 } as const

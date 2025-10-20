@@ -4,8 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Camera, MapPin, X, Plus } from 'lucide-react';
+import { Camera, MapPin, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import trainerAvatar from '@/assets/trainer-avatar.jpg';
 
 interface CreatePostModalProps {
@@ -57,32 +58,99 @@ const CreatePostModal = ({ isOpen, onClose, onCreatePost }: CreatePostModalProps
 
     setIsLoading(true);
     
-    // Create new post
-    const newPost = {
-      user: { id: 'me', name: user.name, avatar: user.avatar },
-      content,
-      images,
-      timestamp: 'Ahora',
-      location: location || 'Mi ubicación',
-      tags: content.match(/#\w+/g)?.map(tag => tag.substring(1)) || [],
-      postType: 'regular' as const
-    };
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast({
+          title: "Error",
+          description: "Debes iniciar sesión para crear publicaciones",
+          variant: "destructive",
+        });
+        return;
+      }
 
-    if (onCreatePost) {
-      onCreatePost(newPost);
-    }
-    
-    setTimeout(() => {
+      // Upload images to Supabase Storage
+      const uploadedImageUrls: string[] = [];
+      
+      for (const image of images) {
+        const base64Data = image.split(',')[1];
+        const byteCharacters = atob(base64Data);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: 'image/jpeg' });
+        
+        const fileName = `${user.id}/${Date.now()}-${Math.random()}.jpg`;
+        
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('post-images')
+          .upload(fileName, blob);
+        
+        if (uploadError) throw uploadError;
+        
+        const { data: { publicUrl } } = supabase.storage
+          .from('post-images')
+          .getPublicUrl(fileName);
+        
+        uploadedImageUrls.push(publicUrl);
+
+        // Track storage usage
+        await supabase.from('storage_usage').insert({
+          user_id: user.id,
+          file_path: fileName,
+          file_size: blob.size,
+          bucket_name: 'post-images'
+        });
+      }
+
+      // Create post in database
+      const { data: postData, error: postError } = await supabase
+        .from('posts')
+        .insert({
+          user_id: user.id,
+          content,
+          image_urls: uploadedImageUrls,
+          location: location || null
+        })
+        .select()
+        .single();
+
+      if (postError) throw postError;
+
       toast({
         title: "¡Publicación creada!",
-        description: "Tu post ha sido compartido exitosamente",
+        description: "Tu post ha sido compartido exitosamente. +100 XP",
       });
-      setIsLoading(false);
+      
       setContent('');
       setLocation('');
       setImages([]);
       onClose();
-    }, 1500);
+      
+      if (onCreatePost) {
+        const newPost = {
+          user: { id: user.id, name: user.user_metadata?.full_name || 'Usuario', avatar: user.user_metadata?.avatar_url || trainerAvatar },
+          content,
+          images: uploadedImageUrls,
+          timestamp: 'Ahora',
+          location: location || 'Mi ubicación',
+          tags: content.match(/#\w+/g)?.map(tag => tag.substring(1)) || [],
+          postType: 'regular' as const
+        };
+        onCreatePost(newPost);
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "No se pudo crear la publicación",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
