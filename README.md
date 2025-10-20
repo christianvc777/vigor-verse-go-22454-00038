@@ -71,3 +71,21 @@ Yes, you can!
 To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
 Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+
+## ESPAÑOL
+
+```sh
+# Clonar el repositorio
+git clone https://github.com/christianvc777/vigor-verse-go-22454-00038.git
+cd vigor-verse-go-22454-00038
+
+# Instalar dependencias
+npm i
+
+# Crear archivo .env con tus claves Supabase
+VITE_SUPABASE_URL=...
+VITE_SUPABASE_PUBLISHABLE_KEY=...
+
+# Correr el proyecto
+npm run dev
+```
