@@ -4,6 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { MapPin, ExternalLink, Star, Clock, Phone, Navigation } from 'lucide-react';
 import gymHero from '@/assets/gym-hero.jpg';
+import gymBogota1 from '@/assets/gym-bogota-1.jpg';
+import gymBogota2 from '@/assets/gym-bogota-2.jpg';
+import gymBogota3 from '@/assets/gym-bogota-3.jpg';
+import AddPlaceModal from './AddPlaceModal';
 
 export interface Location {
   id: string;
@@ -22,6 +26,7 @@ export interface Location {
 
 const Mapa = () => {
   const [selectedType, setSelectedType] = useState<string>('Todos');
+  const [showAddPlace, setShowAddPlace] = useState(false);
 
   const locations: Location[] = [
     {
@@ -31,7 +36,7 @@ const Mapa = () => {
       address: 'Calle 93 #11-27, Chapinero, Bogotá',
       rating: 4.5,
       distance: '0.8 km',
-      image: gymHero,
+      image: gymBogota1,
       amenities: ['Pesas', 'Cardio', 'Clases grupales', 'Piscina', 'Sauna'],
       hours: 'Lun-Vie: 5:00-23:00 | Sáb-Dom: 6:00-20:00',
       phone: '+57 1 555-0123',
@@ -45,7 +50,7 @@ const Mapa = () => {
       address: 'Carrera 13 #63-42, Chapinero, Bogotá',
       rating: 4.2,
       distance: '1.2 km',
-      image: gymHero,
+      image: gymBogota2,
       amenities: ['Pesas', 'Cardio', 'Clases', 'App Smart Fit'],
       hours: 'Lun-Dom: 6:00-22:00',
       phone: '+57 1 555-0124',
@@ -59,7 +64,7 @@ const Mapa = () => {
       address: 'Calle 84 #13-54, Zona Rosa, Bogotá',
       rating: 4.7,
       distance: '1.5 km',
-      image: gymHero,
+      image: gymBogota3,
       amenities: ['Pesas libres', 'CrossFit', 'Spinning', 'Entrenador personal'],
       hours: 'Lun-Vie: 5:30-23:00 | Sáb-Dom: 7:00-21:00',
       phone: '+57 1 555-0125',
@@ -141,15 +146,23 @@ const Mapa = () => {
             <MapPin className="w-6 h-6 text-primary" />
             Mapa Wellness
           </h1>
-          <Button
-            onClick={openInGoogleMaps}
-            size="sm"
-            variant="outline"
-            className="flex items-center gap-1"
-          >
-            <Navigation className="w-4 h-4" />
-            <ExternalLink className="w-3 h-3" />
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              onClick={() => setShowAddPlace(true)}
+              size="sm"
+              className="fitness-button-primary"
+            >
+              + Agregar Lugar
+            </Button>
+            <Button
+              onClick={openInGoogleMaps}
+              size="sm"
+              variant="outline"
+              className="flex items-center gap-1"
+            >
+              <Navigation className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
       </div>
 

@@ -4,9 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Camera, MapPin, X } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Camera, MapPin, X, Package, DollarSign, Phone } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import trainerAvatar from '@/assets/trainer-avatar.jpg';
 
 interface CreatePostModalProps {
@@ -16,10 +18,20 @@ interface CreatePostModalProps {
 }
 
 const CreatePostModal = ({ isOpen, onClose, onCreatePost }: CreatePostModalProps) => {
+  const [postType, setPostType] = useState<'regular' | 'marketplace'>('regular');
   const [content, setContent] = useState('');
   const [location, setLocation] = useState('');
   const [images, setImages] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Marketplace fields
+  const [productName, setProductName] = useState('');
+  const [price, setPrice] = useState('');
+  const [category, setCategory] = useState('');
+  const [condition, setCondition] = useState('');
+  const [whatsappNumber, setWhatsappNumber] = useState('');
+  const [isService, setIsService] = useState(false);
+  
   const { toast } = useToast();
 
   const user = {
@@ -54,6 +66,17 @@ const CreatePostModal = ({ isOpen, onClose, onCreatePost }: CreatePostModalProps
         variant: "destructive",
       });
       return;
+    }
+
+    if (postType === 'marketplace') {
+      if (!productName || !price || !whatsappNumber) {
+        toast({
+          title: "Error",
+          description: "Completa todos los campos del marketplace",
+          variant: "destructive",
+        });
+        return;
+      }
     }
 
     setIsLoading(true);
@@ -120,14 +143,40 @@ const CreatePostModal = ({ isOpen, onClose, onCreatePost }: CreatePostModalProps
 
       if (postError) throw postError;
 
+      // If marketplace post, create marketplace entry
+      if (postType === 'marketplace') {
+        const { error: marketplaceError } = await supabase
+          .from('marketplace_posts')
+          .insert({
+            post_id: postData.id,
+            product_name: productName,
+            price: parseFloat(price),
+            currency: 'COP',
+            category,
+            condition,
+            whatsapp_number: whatsappNumber,
+            is_service: isService
+          });
+
+        if (marketplaceError) throw marketplaceError;
+      }
+
       toast({
         title: "¡Publicación creada!",
         description: "Tu post ha sido compartido exitosamente. +100 XP",
       });
       
+      // Reset form
       setContent('');
       setLocation('');
       setImages([]);
+      setProductName('');
+      setPrice('');
+      setCategory('');
+      setCondition('');
+      setWhatsappNumber('');
+      setIsService(false);
+      setPostType('regular');
       onClose();
       
       if (onCreatePost) {
@@ -138,7 +187,9 @@ const CreatePostModal = ({ isOpen, onClose, onCreatePost }: CreatePostModalProps
           timestamp: 'Ahora',
           location: location || 'Mi ubicación',
           tags: content.match(/#\w+/g)?.map(tag => tag.substring(1)) || [],
-          postType: 'regular' as const
+          postType: postType === 'marketplace' ? (isService ? 'service' : 'product') : 'regular',
+          price: postType === 'marketplace' ? `$${parseFloat(price).toLocaleString()} COP` : undefined,
+          whatsappNumber: postType === 'marketplace' ? whatsappNumber : undefined
         };
         onCreatePost(newPost);
       }
@@ -173,24 +224,126 @@ const CreatePostModal = ({ isOpen, onClose, onCreatePost }: CreatePostModalProps
             </div>
           </div>
 
-          {/* Content */}
-          <Textarea
-            placeholder="¿Qué quieres compartir sobre tu entrenamiento hoy?"
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            className="min-h-24 resize-none"
-          />
+          {/* Post Type Tabs */}
+          <Tabs value={postType} onValueChange={(v) => setPostType(v as any)}>
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="regular">Post Normal</TabsTrigger>
+              <TabsTrigger value="marketplace">Marketplace</TabsTrigger>
+            </TabsList>
 
-          {/* Location */}
-          <div className="relative">
-            <MapPin className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
-            <Input
-              placeholder="Agregar ubicación"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              className="pl-10"
-            />
-          </div>
+            <TabsContent value="regular" className="space-y-4 mt-4">
+              <Textarea
+                placeholder="¿Qué quieres compartir sobre tu entrenamiento hoy?"
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                className="min-h-24 resize-none"
+              />
+
+              <div className="relative">
+                <MapPin className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Agregar ubicación"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="marketplace" className="space-y-4 mt-4">
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  type="button"
+                  variant={!isService ? "default" : "outline"}
+                  onClick={() => setIsService(false)}
+                  className="w-full"
+                >
+                  <Package className="w-4 h-4 mr-2" />
+                  Producto
+                </Button>
+                <Button
+                  type="button"
+                  variant={isService ? "default" : "outline"}
+                  onClick={() => setIsService(true)}
+                  className="w-full"
+                >
+                  Servicio
+                </Button>
+              </div>
+
+              <Input
+                placeholder="Nombre del producto/servicio"
+                value={productName}
+                onChange={(e) => setProductName(e.target.value)}
+              />
+
+              <div className="relative">
+                <DollarSign className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                <Input
+                  type="number"
+                  placeholder="Precio en COP"
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+
+              <Select value={category} onValueChange={setCategory}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Categoría" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="suplementos">Suplementos</SelectItem>
+                  <SelectItem value="equipamiento">Equipamiento</SelectItem>
+                  <SelectItem value="ropa">Ropa Deportiva</SelectItem>
+                  <SelectItem value="tecnologia">Tecnología</SelectItem>
+                  <SelectItem value="servicios">Servicios</SelectItem>
+                  <SelectItem value="otro">Otro</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {!isService && (
+                <Select value={condition} onValueChange={setCondition}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Condición" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="nuevo">Nuevo</SelectItem>
+                    <SelectItem value="como-nuevo">Como Nuevo</SelectItem>
+                    <SelectItem value="usado-bueno">Usado - Buen Estado</SelectItem>
+                    <SelectItem value="usado-regular">Usado - Regular</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+
+              <div className="relative">
+                <Phone className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="WhatsApp (ej: +573001234567)"
+                  value={whatsappNumber}
+                  onChange={(e) => setWhatsappNumber(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+
+              <Textarea
+                placeholder="Descripción del producto/servicio"
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                className="min-h-20 resize-none"
+              />
+
+              <div className="relative">
+                <MapPin className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="Ubicación (opcional)"
+                  value={location}
+                  onChange={(e) => setLocation(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </TabsContent>
+          </Tabs>
 
           {/* Images Preview */}
           {images.length > 0 && (

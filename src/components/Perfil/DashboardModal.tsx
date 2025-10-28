@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -27,6 +28,27 @@ interface DashboardModalProps {
 }
 
 const DashboardModal = ({ isOpen, onClose, stats }: DashboardModalProps) => {
+  const [userMetrics, setUserMetrics] = useState<any>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      loadUserMetrics();
+    }
+  }, [isOpen]);
+
+  const loadUserMetrics = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data } = await supabase
+      .from('user_metrics')
+      .select('*')
+      .eq('user_id', user.id)
+      .single();
+    
+    setUserMetrics(data);
+  };
+
   const monthlyData = {
     totalWorkouts: 22,
     totalCalories: 12450,

@@ -46,6 +46,48 @@ export type Database = {
           },
         ]
       }
+      challenges: {
+        Row: {
+          challenge_type: string
+          created_at: string | null
+          description: string | null
+          duration_days: number
+          end_date: string
+          id: string
+          start_date: string
+          target_value: number
+          title: string
+          unit: string
+          xp_reward: number | null
+        }
+        Insert: {
+          challenge_type: string
+          created_at?: string | null
+          description?: string | null
+          duration_days: number
+          end_date: string
+          id?: string
+          start_date: string
+          target_value: number
+          title: string
+          unit: string
+          xp_reward?: number | null
+        }
+        Update: {
+          challenge_type?: string
+          created_at?: string | null
+          description?: string | null
+          duration_days?: number
+          end_date?: string
+          id?: string
+          start_date?: string
+          target_value?: number
+          title?: string
+          unit?: string
+          xp_reward?: number | null
+        }
+        Relationships: []
+      }
       events: {
         Row: {
           capacity: number
@@ -99,6 +141,115 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      marketplace_posts: {
+        Row: {
+          category: string
+          condition: string | null
+          created_at: string | null
+          currency: string | null
+          id: string
+          is_service: boolean | null
+          post_id: string
+          price: number
+          product_name: string
+          updated_at: string | null
+          whatsapp_number: string
+        }
+        Insert: {
+          category: string
+          condition?: string | null
+          created_at?: string | null
+          currency?: string | null
+          id?: string
+          is_service?: boolean | null
+          post_id: string
+          price: number
+          product_name: string
+          updated_at?: string | null
+          whatsapp_number: string
+        }
+        Update: {
+          category?: string
+          condition?: string | null
+          created_at?: string | null
+          currency?: string | null
+          id?: string
+          is_service?: boolean | null
+          post_id?: string
+          price?: number
+          product_name?: string
+          updated_at?: string | null
+          whatsapp_number?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketplace_posts_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      places: {
+        Row: {
+          address: string
+          category: string
+          created_at: string | null
+          description: string | null
+          id: string
+          image_url: string | null
+          latitude: number
+          longitude: number
+          name: string
+          phone: string | null
+          rating: number | null
+          updated_at: string | null
+          user_id: string
+          website: string | null
+        }
+        Insert: {
+          address: string
+          category: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          latitude: number
+          longitude: number
+          name: string
+          phone?: string | null
+          rating?: number | null
+          updated_at?: string | null
+          user_id: string
+          website?: string | null
+        }
+        Update: {
+          address?: string
+          category?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          latitude?: number
+          longitude?: number
+          name?: string
+          phone?: string | null
+          rating?: number | null
+          updated_at?: string | null
+          user_id?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "places_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       post_comments: {
         Row: {
@@ -278,6 +429,119 @@ export type Database = {
           },
         ]
       }
+      user_challenges: {
+        Row: {
+          challenge_id: string
+          completed_at: string | null
+          current_progress: number | null
+          id: string
+          is_completed: boolean | null
+          joined_at: string | null
+          user_id: string
+        }
+        Insert: {
+          challenge_id: string
+          completed_at?: string | null
+          current_progress?: number | null
+          id?: string
+          is_completed?: boolean | null
+          joined_at?: string | null
+          user_id: string
+        }
+        Update: {
+          challenge_id?: string
+          completed_at?: string | null
+          current_progress?: number | null
+          id?: string
+          is_completed?: boolean | null
+          joined_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_challenges_challenge_id_fkey"
+            columns: ["challenge_id"]
+            isOneToOne: false
+            referencedRelation: "challenges"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_challenges_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_metrics: {
+        Row: {
+          body_fat_percentage: number | null
+          calories_burned_today: number | null
+          created_at: string | null
+          heart_rate_avg: number | null
+          height_cm: number | null
+          id: string
+          muscle_mass_kg: number | null
+          sleep_hours: number | null
+          steps_today: number | null
+          streak_days: number | null
+          total_workouts: number | null
+          updated_at: string | null
+          user_id: string
+          water_intake_ml: number | null
+          weight_kg: number | null
+          workouts_this_month: number | null
+          workouts_this_week: number | null
+        }
+        Insert: {
+          body_fat_percentage?: number | null
+          calories_burned_today?: number | null
+          created_at?: string | null
+          heart_rate_avg?: number | null
+          height_cm?: number | null
+          id?: string
+          muscle_mass_kg?: number | null
+          sleep_hours?: number | null
+          steps_today?: number | null
+          streak_days?: number | null
+          total_workouts?: number | null
+          updated_at?: string | null
+          user_id: string
+          water_intake_ml?: number | null
+          weight_kg?: number | null
+          workouts_this_month?: number | null
+          workouts_this_week?: number | null
+        }
+        Update: {
+          body_fat_percentage?: number | null
+          calories_burned_today?: number | null
+          created_at?: string | null
+          heart_rate_avg?: number | null
+          height_cm?: number | null
+          id?: string
+          muscle_mass_kg?: number | null
+          sleep_hours?: number | null
+          steps_today?: number | null
+          streak_days?: number | null
+          total_workouts?: number | null
+          updated_at?: string | null
+          user_id?: string
+          water_intake_ml?: number | null
+          weight_kg?: number | null
+          workouts_this_month?: number | null
+          workouts_this_week?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_metrics_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_xp: {
         Row: {
           created_at: string | null
@@ -308,6 +572,62 @@ export type Database = {
             foreignKeyName: "user_xp_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      wearable_data: {
+        Row: {
+          active_minutes: number | null
+          calories_burned: number | null
+          created_at: string | null
+          device_type: string
+          distance_km: number | null
+          heart_rate_avg: number | null
+          heart_rate_max: number | null
+          heart_rate_min: number | null
+          id: string
+          sleep_hours: number | null
+          steps: number | null
+          sync_date: string
+          user_id: string
+        }
+        Insert: {
+          active_minutes?: number | null
+          calories_burned?: number | null
+          created_at?: string | null
+          device_type: string
+          distance_km?: number | null
+          heart_rate_avg?: number | null
+          heart_rate_max?: number | null
+          heart_rate_min?: number | null
+          id?: string
+          sleep_hours?: number | null
+          steps?: number | null
+          sync_date?: string
+          user_id: string
+        }
+        Update: {
+          active_minutes?: number | null
+          calories_burned?: number | null
+          created_at?: string | null
+          device_type?: string
+          distance_km?: number | null
+          heart_rate_avg?: number | null
+          heart_rate_max?: number | null
+          heart_rate_min?: number | null
+          id?: string
+          sleep_hours?: number | null
+          steps?: number | null
+          sync_date?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wearable_data_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -422,14 +742,8 @@ export type Database = {
         }
         Returns: undefined
       }
-      calculate_level: {
-        Args: { xp_amount: number }
-        Returns: number
-      }
-      create_seed_data: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      calculate_level: { Args: { xp_amount: number }; Returns: number }
+      create_seed_data: { Args: never; Returns: undefined }
     }
     Enums: {
       event_type:

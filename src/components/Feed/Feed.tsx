@@ -7,14 +7,15 @@ import { Heart, MessageCircle, Share, Plus, ChevronLeft, ChevronRight } from 'lu
 import { useToast } from '@/hooks/use-toast';
 import { useXP } from '@/contexts/XPContext';
 import CreatePostModal from './CreatePostModal';
+import WearableSync from './WearableSync';
 import workoutPost1 from '@/assets/workout-post-1.jpg';
-import nutritionPost1 from '@/assets/nutrition-post-1.jpg';
-import groupFitnessPost from '@/assets/group-fitness-post.jpg';
+import gymEquipmentPost from '@/assets/gym-equipment-post.jpg';
+import healthyMealPost from '@/assets/healthy-meal-post.jpg';
 import doctorSpecialist from '@/assets/doctor-specialist.jpg';
 import proteinSupplements from '@/assets/protein-supplements.jpg';
 import smartwatchFitness from '@/assets/smartwatch-fitness.jpg';
-import healthyColombianMeal from '@/assets/healthy-colombian-meal.jpg';
-import quinoaSaladRecipe from '@/assets/quinoa-salad-recipe.jpg';
+import proteinShakePost from '@/assets/protein-shake-post.jpg';
+import healthyFoodPost from '@/assets/healthy-food-post.jpg';
 import fitnessPointsTrainer from '@/assets/fitness-tips-trainer.jpg';
 import trainerAvatar from '@/assets/trainer-avatar.jpg';
 
@@ -69,7 +70,7 @@ const Feed = () => {
         avatar: trainerAvatar,
       },
       content: 'Meal prep del domingo 🥗 Una buena alimentación es el 70% del éxito. ¿Cuál es tu comida favorita post-entrenamiento?',
-      images: [nutritionPost1],
+      images: [healthyMealPost],
       likes: 89,
       comments: 15,
       timestamp: 'Hace 4 horas',
@@ -86,7 +87,7 @@ const Feed = () => {
         avatar: trainerAvatar,
       },
       content: '¡Clase grupal de HIIT completada! 🔥 La energía del grupo es incomparable. ¡Nos vemos mañana para más!',
-      images: [groupFitnessPost],
+      images: [gymEquipmentPost],
       likes: 156,
       comments: 32,
       timestamp: 'Hace 6 horas',
@@ -160,7 +161,7 @@ const Feed = () => {
         avatar: trainerAvatar,
       },
       content: '🥘 Receta: Bandeja Paisa Saludable - Versión fitness de nuestro plato tradicional. Rica en proteína y baja en grasa.',
-      images: [healthyColombianMeal],
+      images: [proteinShakePost],
       likes: 312,
       comments: 89,
       timestamp: 'Hace 8 horas',
@@ -177,7 +178,7 @@ const Feed = () => {
         avatar: trainerAvatar,
       },
       content: '🥗 Bowl de Quinoa Power: La combinación perfecta de proteínas vegetales y nutrientes. ¡Energía para todo el día!',
-      images: [quinoaSaladRecipe],
+      images: [healthyFoodPost],
       likes: 178,
       comments: 45,
       timestamp: 'Hace 12 horas',
@@ -287,6 +288,8 @@ const Feed = () => {
 
       {/* Posts Feed */}
       <div className="p-4 space-y-4">
+        {/* Wearable Integration */}
+        <WearableSync />
         {posts.map((post) => {
           const currentImageIndex = currentImageIndexes[post.id] || 0;
           return (
