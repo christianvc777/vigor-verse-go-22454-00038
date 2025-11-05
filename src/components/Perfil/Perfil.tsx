@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -38,21 +38,115 @@ const Perfil = () => {
   const [showConfig, setShowConfig] = useState(false);
   const [showFavorites, setShowFavorites] = useState(false);
   const [showAchievements, setShowAchievements] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [myPosts, setMyPosts] = useState<any[]>([]);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const [userProfile, setUserProfile] = useState({
-    name: 'Carlos Fitness',
-    username: '@carlosfitness',
-    bio: 'Entrenador personal certificado | Transformando vidas a través del fitness 💪',
+    name: 'Usuario',
+    username: '@usuario',
+    bio: '',
     avatar: trainerAvatar,
-    followers: 1240,
-    following: 890,
-    posts: 156,
+    followers: 0,
+    following: 0,
+    posts: 0,
     location: 'Bogotá, Colombia',
     joined: 'Enero 2023',
-    verified: true,
+    verified: false,
   });
+
+  useEffect(() => {
+    loadUserProfile();
+    loadUserPosts();
+  }, []);
+
+  const loadUserProfile = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        navigate('/auth');
+        return;
+      }
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (profile) {
+        setUserProfile({
+          name: profile.full_name || 'Usuario',
+          username: `@${profile.username || 'usuario'}`,
+          bio: profile.bio || '',
+          avatar: profile.avatar_url || trainerAvatar,
+          followers: 0,
+          following: 0,
+          posts: 0,
+          location: 'Bogotá, Colombia',
+          joined: new Date(profile.created_at).toLocaleDateString('es-CO', { month: 'long', year: 'numeric' }),
+          verified: false,
+        });
+      }
+
+      // Count user's posts
+      const { count } = await supabase
+        .from('posts')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+
+      setUserProfile(prev => ({ ...prev, posts: count || 0 }));
+      setLoading(false);
+    } catch (error) {
+      console.error('Error loading profile:', error);
+      setLoading(false);
+    }
+  };
+
+  const loadUserPosts = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: posts } = await supabase
+        .from('posts')
+        .select(`
+          id,
+          content,
+          image_urls,
+          created_at
+        `)
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(6);
+
+      if (posts) {
+        const postsWithStats = await Promise.all(posts.map(async (post) => {
+          const { count: likesCount } = await supabase
+            .from('post_likes')
+            .select('*', { count: 'exact', head: true })
+            .eq('post_id', post.id);
+
+          const { count: commentsCount } = await supabase
+            .from('post_comments')
+            .select('*', { count: 'exact', head: true })
+            .eq('post_id', post.id);
+
+          return {
+            id: post.id,
+            image: post.image_urls?.[0] || '',
+            likes: likesCount || 0,
+            comments: commentsCount || 0,
+          };
+        }));
+
+        setMyPosts(postsWithStats);
+      }
+    } catch (error) {
+      console.error('Error loading posts:', error);
+    }
+  };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -81,14 +175,6 @@ const Perfil = () => {
     { id: '4', title: 'Fuerza Legendaria', icon: Award, earned: true },
   ];
 
-  const myPosts = [
-    { id: '1', image: '/api/placeholder/150/150', likes: 89, comments: 12 },
-    { id: '2', image: '/api/placeholder/150/150', likes: 156, comments: 23 },
-    { id: '3', image: '/api/placeholder/150/150', likes: 234, comments: 45 },
-    { id: '4', image: '/api/placeholder/150/150', likes: 98, comments: 8 },
-    { id: '5', image: '/api/placeholder/150/150', likes: 167, comments: 19 },
-    { id: '6', image: '/api/placeholder/150/150', likes: 203, comments: 31 },
-  ];
 
   return (
     <div className="max-w-md mx-auto bg-background min-h-screen">
@@ -247,11 +333,15 @@ const Perfil = () => {
           {/* Posts Tab */}
           <TabsContent value="posts" className="mt-4">
             <div className="grid grid-cols-3 gap-1">
-              {myPosts.map((post) => (
+              {myPosts.length > 0 ? myPosts.map((post) => (
                 <div key={post.id} className="relative aspect-square">
-                  <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 rounded-lg flex items-center justify-center">
-                    <Activity className="w-8 h-8 text-primary/60" />
-                  </div>
+                  {post.image ? (
+                    <img src={post.image} alt="Post" className="w-full h-full object-cover rounded-lg" />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent/20 rounded-lg flex items-center justify-center">
+                      <Activity className="w-8 h-8 text-primary/60" />
+                    </div>
+                  )}
                   <div className="absolute bottom-1 right-1 flex gap-1">
                     <div className="bg-black/70 text-white text-xs px-1 rounded flex items-center gap-1">
                       <Heart className="w-3 h-3" />
@@ -259,7 +349,12 @@ const Perfil = () => {
                     </div>
                   </div>
                 </div>
-              ))}
+              )) : (
+                <div className="col-span-3 text-center py-8 text-muted-foreground">
+                  <Activity className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                  <p>Aún no tienes posts</p>
+                </div>
+              )}
             </div>
           </TabsContent>
 

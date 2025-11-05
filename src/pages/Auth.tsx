@@ -6,8 +6,10 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Eye, EyeOff, Dumbbell } from 'lucide-react';
+import { Eye, EyeOff, Dumbbell, Camera } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Textarea } from '@/components/ui/textarea';
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -18,6 +20,8 @@ const Auth = () => {
     password: '',
     fullName: '',
     username: '',
+    bio: '',
+    avatar: '',
   });
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [privacyAccepted, setPrivacyAccepted] = useState(false);
@@ -50,6 +54,17 @@ const Auth = () => {
     }
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData({ ...formData, avatar: reader.result as string });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -64,6 +79,36 @@ const Auth = () => {
 
     setLoading(true);
 
+    // Upload avatar to Supabase Storage if exists
+    let avatarUrl = '';
+    if (formData.avatar) {
+      const { data: { user: tempUser } } = await supabase.auth.getUser();
+      const timestamp = Date.now();
+      
+      const base64Data = formData.avatar.split(',')[1];
+      const byteCharacters = atob(base64Data);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: 'image/jpeg' });
+      
+      const fileName = `avatars/${timestamp}.jpg`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('post-images')
+        .upload(fileName, blob);
+      
+      if (!uploadError) {
+        const { data: { publicUrl } } = supabase.storage
+          .from('post-images')
+          .getPublicUrl(fileName);
+        
+        avatarUrl = publicUrl;
+      }
+    }
+
     const { error } = await supabase.auth.signUp({
       email: formData.email,
       password: formData.password,
@@ -71,6 +116,8 @@ const Auth = () => {
         data: {
           full_name: formData.fullName,
           username: formData.username,
+          avatar_url: avatarUrl,
+          bio: formData.bio,
         },
         emailRedirectTo: `${window.location.origin}/`,
       },
@@ -111,6 +158,26 @@ const Auth = () => {
         <form onSubmit={isLogin ? handleLogin : handleSignup} className="space-y-4">
           {!isLogin && (
             <>
+              <div className="flex flex-col items-center gap-4 mb-4">
+                <Avatar className="w-24 h-24">
+                  <AvatarImage src={formData.avatar} />
+                  <AvatarFallback>{formData.fullName?.[0] || 'U'}</AvatarFallback>
+                </Avatar>
+                <Label htmlFor="avatar" className="cursor-pointer">
+                  <div className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90">
+                    <Camera className="w-4 h-4" />
+                    <span>Subir foto de perfil</span>
+                  </div>
+                  <Input
+                    id="avatar"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
+                </Label>
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="fullName">Nombre Completo</Label>
                 <Input
@@ -129,6 +196,16 @@ const Auth = () => {
                   value={formData.username}
                   onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                   required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="bio">Descripción (Opcional)</Label>
+                <Textarea
+                  id="bio"
+                  value={formData.bio}
+                  onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+                  placeholder="Cuéntanos un poco sobre ti..."
+                  rows={3}
                 />
               </div>
             </>

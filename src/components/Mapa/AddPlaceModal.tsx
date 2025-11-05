@@ -23,7 +23,8 @@ const AddPlaceModal = ({ isOpen, onClose, onPlaceAdded }: AddPlaceModalProps) =>
     phone: '',
     website: '',
     latitude: '',
-    longitude: ''
+    longitude: '',
+    monthlyPrice: ''
   });
   const [image, setImage] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
@@ -110,7 +111,8 @@ const AddPlaceModal = ({ isOpen, onClose, onPlaceAdded }: AddPlaceModalProps) =>
           image_url: imageUrl || null,
           phone: formData.phone || null,
           website: formData.website || null,
-          rating: 0
+          rating: 0,
+          monthly_price: formData.monthlyPrice ? parseFloat(formData.monthlyPrice) : null
         });
 
       if (error) throw error;
@@ -132,7 +134,8 @@ const AddPlaceModal = ({ isOpen, onClose, onPlaceAdded }: AddPlaceModalProps) =>
         phone: '',
         website: '',
         latitude: '',
-        longitude: ''
+        longitude: '',
+        monthlyPrice: ''
       });
       setImage('');
     } catch (error: any) {
@@ -209,6 +212,13 @@ const AddPlaceModal = ({ isOpen, onClose, onPlaceAdded }: AddPlaceModalProps) =>
             placeholder="Sitio web (opcional)"
             value={formData.website}
             onChange={(e) => setFormData({ ...formData, website: e.target.value })}
+          />
+
+          <Input
+            placeholder="Precio mensual (opcional, ej: 150000)"
+            type="number"
+            value={formData.monthlyPrice}
+            onChange={(e) => setFormData({ ...formData, monthlyPrice: e.target.value })}
           />
 
           {/* Image Preview */}

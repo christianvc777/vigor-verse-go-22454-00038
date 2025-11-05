@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MapPin, ExternalLink, Star, Clock, Phone, Navigation } from 'lucide-react';
+import { MapPin, ExternalLink, Star, Clock, Phone, Navigation, Plus } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import AddPlaceModal from './AddPlaceModal';
 import gymHero from '@/assets/gym-hero.jpg';
 import gymBogota1 from '@/assets/gym-bogota-1.jpg';
 import gymBogota2 from '@/assets/gym-bogota-2.jpg';
 import gymBogota3 from '@/assets/gym-bogota-3.jpg';
-import AddPlaceModal from './AddPlaceModal';
 
 export interface Location {
   id: string;
@@ -21,14 +22,35 @@ export interface Location {
   hours: string;
   phone?: string;
   priceRange: string;
+  monthlyPrice?: number;
   description: string;
 }
 
 const Mapa = () => {
   const [selectedType, setSelectedType] = useState<string>('Todos');
   const [showAddPlace, setShowAddPlace] = useState(false);
+  const [dbPlaces, setDbPlaces] = useState<any[]>([]);
 
-  const locations: Location[] = [
+  useEffect(() => {
+    loadPlaces();
+  }, []);
+
+  const loadPlaces = async () => {
+    try {
+      const { data } = await supabase
+        .from('places')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (data) {
+        setDbPlaces(data);
+      }
+    } catch (error) {
+      console.error('Error loading places:', error);
+    }
+  };
+
+  const defaultLocations: Location[] = [
     {
       id: '1',
       name: 'Bodytech La 93',
@@ -40,7 +62,8 @@ const Mapa = () => {
       amenities: ['Pesas', 'Cardio', 'Clases grupales', 'Piscina', 'Sauna'],
       hours: 'Lun-Vie: 5:00-23:00 | Sáb-Dom: 6:00-20:00',
       phone: '+57 1 555-0123',
-      priceRange: '$$$$',
+      priceRange: '$280.000',
+      monthlyPrice: 280000,
       description: 'Gimnasio premium con equipos de última tecnología y amplia variedad de clases.'
     },
     {
@@ -54,7 +77,8 @@ const Mapa = () => {
       amenities: ['Pesas', 'Cardio', 'Clases', 'App Smart Fit'],
       hours: 'Lun-Dom: 6:00-22:00',
       phone: '+57 1 555-0124',
-      priceRange: '$$',
+      priceRange: '$89.900',
+      monthlyPrice: 89900,
       description: 'Cadena de gimnasios accesible con equipos modernos y ambiente energético.'
     },
     {
@@ -68,7 +92,8 @@ const Mapa = () => {
       amenities: ['Pesas libres', 'CrossFit', 'Spinning', 'Entrenador personal'],
       hours: 'Lun-Vie: 5:30-23:00 | Sáb-Dom: 7:00-21:00',
       phone: '+57 1 555-0125',
-      priceRange: '$$$',
+      priceRange: '$180.000',
+      monthlyPrice: 180000,
       description: 'Legendario gimnasio enfocado en fuerza y entrenamiento de alto rendimiento.'
     },
     {
@@ -82,6 +107,7 @@ const Mapa = () => {
       amenities: ['Ciclovía', 'Senderos', 'Máquinas outdoor', 'Zona de estiramiento'],
       hours: '24 horas',
       priceRange: 'Gratis',
+      monthlyPrice: 0,
       description: 'Parque lineal perfecto para correr, caminar y ejercitarse al aire libre.'
     },
     {
@@ -95,7 +121,8 @@ const Mapa = () => {
       amenities: ['Yoga', 'Meditación', 'Pilates', 'Props incluidos'],
       hours: 'Lun-Vie: 6:00-21:00 | Sáb-Dom: 8:00-18:00',
       phone: '+57 1 555-0126',
-      priceRange: '$$$',
+      priceRange: '$150.000',
+      monthlyPrice: 150000,
       description: 'Estudio especializado en yoga y bienestar mental con instructores certificados.'
     },
     {
@@ -109,32 +136,41 @@ const Mapa = () => {
       amenities: ['Piscina olímpica', 'Aqua fitness', 'Natación', 'Hidromasaje'],
       hours: 'Lun-Dom: 6:00-20:00',
       phone: '+57 1 555-0127',
-      priceRange: '$$$$',
+      priceRange: '$250.000',
+      monthlyPrice: 250000,
       description: 'Club exclusivo con instalaciones acuáticas de primera clase.'
     }
   ];
 
+  // Combine database places with default locations
+  const dbPlacesFormatted = dbPlaces.map(place => ({
+    id: place.id,
+    name: place.name,
+    type: (place.category as 'Gimnasio' | 'Estudio' | 'Parque' | 'Piscina') || 'Gimnasio',
+    address: place.address,
+    rating: place.rating || 0,
+    distance: '1.0 km',
+    image: place.image_url || gymBogota1,
+    amenities: [],
+    hours: '6:00-22:00',
+    phone: place.phone || undefined,
+    priceRange: place.monthly_price ? `$${place.monthly_price.toLocaleString()}` : '$150.000',
+    monthlyPrice: place.monthly_price || 150000,
+    description: place.description || 'Nuevo lugar agregado por la comunidad.'
+  }));
+
+  const allLocations = [...dbPlacesFormatted, ...defaultLocations];
+
   const locationTypes = ['Todos', 'Gimnasio', 'Estudio', 'Parque', 'Piscina'];
 
   const filteredLocations = selectedType === 'Todos' 
-    ? locations 
-    : locations.filter(location => location.type === selectedType);
+    ? allLocations 
+    : allLocations.filter(location => location.type === selectedType);
 
   const openInGoogleMaps = () => {
     const query = encodeURIComponent('Bodytech Bogotá');
     const url = `https://www.google.com/maps/search/${query}`;
     window.open(url, '_blank');
-  };
-
-  const getPriceColor = (priceRange: string) => {
-    switch (priceRange) {
-      case 'Gratis': return 'text-success';
-      case '$': return 'text-success';
-      case '$$': return 'text-warning';
-      case '$$$': return 'text-primary';
-      case '$$$$': return 'text-destructive';
-      default: return 'text-muted-foreground';
-    }
   };
 
   return (
@@ -152,7 +188,8 @@ const Mapa = () => {
               size="sm"
               className="fitness-button-primary"
             >
-              + Agregar Lugar
+              <Plus className="w-4 h-4 mr-1" />
+              Agregar
             </Button>
             <Button
               onClick={openInGoogleMaps}
@@ -175,7 +212,7 @@ const Mapa = () => {
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
         <div className="absolute bottom-4 left-4 text-white">
-          <h2 className="text-lg font-semibold">6 ubicaciones encontradas</h2>
+          <h2 className="text-lg font-semibold">{allLocations.length} ubicaciones encontradas</h2>
           <p className="text-sm opacity-90">En tu área de Chapinero</p>
         </div>
       </div>
@@ -232,8 +269,11 @@ const Mapa = () => {
                     </div>
                   </div>
                 </div>
-                <div className={`text-lg font-bold ${getPriceColor(location.priceRange)}`}>
+                <div className="text-sm font-bold text-primary">
                   {location.priceRange}
+                  {location.monthlyPrice && location.monthlyPrice > 0 && (
+                    <span className="text-xs text-muted-foreground block">/mes</span>
+                  )}
                 </div>
               </div>
 
@@ -247,18 +287,20 @@ const Mapa = () => {
               <p className="text-sm mb-3">{location.description}</p>
 
               {/* Amenities */}
-              <div className="flex flex-wrap gap-1 mb-3">
-                {location.amenities.slice(0, 3).map((amenity, index) => (
-                  <Badge key={index} variant="secondary" className="text-xs">
-                    {amenity}
-                  </Badge>
-                ))}
-                {location.amenities.length > 3 && (
-                  <Badge variant="secondary" className="text-xs">
-                    +{location.amenities.length - 3} más
-                  </Badge>
-                )}
-              </div>
+              {location.amenities.length > 0 && (
+                <div className="flex flex-wrap gap-1 mb-3">
+                  {location.amenities.slice(0, 3).map((amenity, index) => (
+                    <Badge key={index} variant="secondary" className="text-xs">
+                      {amenity}
+                    </Badge>
+                  ))}
+                  {location.amenities.length > 3 && (
+                    <Badge variant="secondary" className="text-xs">
+                      +{location.amenities.length - 3} más
+                    </Badge>
+                  )}
+                </div>
+              )}
 
               {/* Hours & Contact */}
               <div className="space-y-2 mb-4 text-sm">
@@ -293,6 +335,15 @@ const Mapa = () => {
           </Card>
         ))}
       </div>
+
+      <AddPlaceModal
+        isOpen={showAddPlace}
+        onClose={() => setShowAddPlace(false)}
+        onPlaceAdded={() => {
+          loadPlaces();
+          setShowAddPlace(false);
+        }}
+      />
     </div>
   );
 };

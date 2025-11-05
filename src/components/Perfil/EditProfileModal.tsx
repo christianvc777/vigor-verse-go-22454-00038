@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Camera } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface EditProfileModalProps {
   isOpen: boolean;
@@ -35,13 +36,64 @@ const EditProfileModal = ({ isOpen, onClose, profile, onUpdate }: EditProfileMod
     }
   };
 
-  const handleSave = () => {
-    onUpdate(formData);
-    toast({
-      title: 'Perfil actualizado',
-      description: 'Tus cambios han sido guardados',
-    });
-    onClose();
+  const handleSave = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Upload avatar if changed and is base64
+      let avatarUrl = formData.avatar;
+      if (formData.avatar && formData.avatar.startsWith('data:')) {
+        const timestamp = Date.now();
+        const base64Data = formData.avatar.split(',')[1];
+        const byteCharacters = atob(base64Data);
+        const byteNumbers = new Array(byteCharacters.length);
+        for (let i = 0; i < byteCharacters.length; i++) {
+          byteNumbers[i] = byteCharacters.charCodeAt(i);
+        }
+        const byteArray = new Uint8Array(byteNumbers);
+        const blob = new Blob([byteArray], { type: 'image/jpeg' });
+        
+        const fileName = `avatars/${user.id}/${timestamp}.jpg`;
+        
+        const { error: uploadError } = await supabase.storage
+          .from('post-images')
+          .upload(fileName, blob);
+        
+        if (!uploadError) {
+          const { data: { publicUrl } } = supabase.storage
+            .from('post-images')
+            .getPublicUrl(fileName);
+          
+          avatarUrl = publicUrl;
+        }
+      }
+
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          full_name: formData.name,
+          username: formData.username,
+          bio: formData.bio,
+          avatar_url: avatarUrl,
+        })
+        .eq('id', user.id);
+
+      if (error) throw error;
+
+      onUpdate({ ...formData, avatar: avatarUrl });
+      toast({
+        title: 'Perfil actualizado',
+        description: 'Tus cambios han sido guardados',
+      });
+      onClose();
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive',
+      });
+    }
   };
 
   return (

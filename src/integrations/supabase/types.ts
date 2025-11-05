@@ -202,6 +202,7 @@ export type Database = {
           image_url: string | null
           latitude: number
           longitude: number
+          monthly_price: number | null
           name: string
           phone: string | null
           rating: number | null
@@ -218,6 +219,7 @@ export type Database = {
           image_url?: string | null
           latitude: number
           longitude: number
+          monthly_price?: number | null
           name: string
           phone?: string | null
           rating?: number | null
@@ -234,6 +236,7 @@ export type Database = {
           image_url?: string | null
           latitude?: number
           longitude?: number
+          monthly_price?: number | null
           name?: string
           phone?: string | null
           rating?: number | null

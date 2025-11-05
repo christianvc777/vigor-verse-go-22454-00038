@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useXP } from '@/contexts/XPContext';
 import CreatePostModal from './CreatePostModal';
 import WearableSync from './WearableSync';
+import CheckoutFlow from '../Marketplace/CheckoutFlow';
 import workoutPost1 from '@/assets/workout-post-1.jpg';
 import gymEquipmentPost from '@/assets/gym-equipment-post.jpg';
 import healthyMealPost from '@/assets/healthy-meal-post.jpg';
@@ -43,6 +44,8 @@ export interface Post {
 
 const Feed = () => {
   const [showCreatePost, setShowCreatePost] = useState(false);
+  const [showCheckout, setShowCheckout] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<any>(null);
   const [currentImageIndexes, setCurrentImageIndexes] = useState<{[key: string]: number}>({});
   const [posts, setPosts] = useState<Post[]>([
     {
@@ -410,16 +413,36 @@ const Feed = () => {
 
                 {/* WhatsApp Contact Button */}
                 {post.whatsappNumber && (
-                  <Button
-                    size="sm"
-                    className="fitness-button-primary mb-2"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      openWhatsApp(post.whatsappNumber!, `Hola! Vi tu ${post.postType === 'service' ? 'servicio' : 'producto'} en Teso: ${post.content.substring(0, 50)}...`);
-                    }}
-                  >
-                    Contactar por WhatsApp
-                  </Button>
+                  <div className="flex gap-2 mb-2">
+                    <Button
+                      size="sm"
+                      className="fitness-button-primary flex-1"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openWhatsApp(post.whatsappNumber!, `Hola! Vi tu ${post.postType === 'service' ? 'servicio' : 'producto'} en Teso: ${post.content.substring(0, 50)}...`);
+                      }}
+                    >
+                      Contactar por WhatsApp
+                    </Button>
+                    {post.postType === 'product' && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="flex-1"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedProduct({
+                            name: post.content.substring(0, 50),
+                            price: parseInt(post.price?.replace(/[^0-9]/g, '') || '0'),
+                            image: post.images[0]
+                          });
+                          setShowCheckout(true);
+                        }}
+                      >
+                        Comprar
+                      </Button>
+                    )}
+                  </div>
                 )}
 
                 {post.tags && (
@@ -452,6 +475,17 @@ const Feed = () => {
         onClose={() => setShowCreatePost(false)}
         onCreatePost={addNewPost}
       />
+      
+      {selectedProduct && (
+        <CheckoutFlow
+          isOpen={showCheckout}
+          onClose={() => {
+            setShowCheckout(false);
+            setSelectedProduct(null);
+          }}
+          product={selectedProduct}
+        />
+      )}
     </div>
   );
 };
