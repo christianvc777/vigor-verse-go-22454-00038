@@ -52,7 +52,7 @@ const Feed = () => {
       id: '1',
       user: {
         id: '1',
-        name: 'Carlos Fitness',
+        name: 'Sofia Alvarez',
         avatar: trainerAvatar,
       },
       content: '¡Increíble sesión de entrenamiento hoy! 💪 Recuerden que la constancia es clave. #NoExcuses #FitnessMotivation',
